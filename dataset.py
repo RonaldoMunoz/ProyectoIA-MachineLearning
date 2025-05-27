@@ -8,3 +8,4 @@ df = kagglehub.load_dataset(
 )
 
 print(df.head())
+df.to_csv("Pokemon.csv", index=False)
