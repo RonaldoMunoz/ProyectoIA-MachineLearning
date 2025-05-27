@@ -13,14 +13,14 @@ for col in required_columns:
     assert col in df.columns, f"Falta la columna: {col}"
 
 # Crear rasgos de comportamiento
-df['Aggression'] = (df['Attack'] + df['Sp. Atk']) / df['Total']
-df['Endurance']  = (df['HP'] + df['Defense'] + df['Sp. Def']) / df['Total']
-df['Mobility']   = df['Speed'] / df['Total']
-df['Specialist'] = abs(df['Attack'] - df['Sp. Atk']) / df['Total']
-df['Balance']    = df[['HP','Attack','Defense','Sp. Atk','Sp. Def','Speed']].std(axis=1, ddof=0)
+df['Agresividad'] = (df['Attack'] + df['Sp. Atk']) / df['Total']
+df['Resistencia']  = (df['HP'] + df['Defense'] + df['Sp. Def']) / df['Total']
+df['Movilidad']   = df['Speed'] / df['Total']
+df['Especialista'] = abs(df['Attack'] - df['Sp. Atk']) / df['Total']
+df['Balanceado']    = df[['HP','Attack','Defense','Sp. Atk','Sp. Def','Speed']].std(axis=1, ddof=0)
 
 # Selección de features
-features = ['Aggression', 'Endurance', 'Mobility', 'Specialist', 'Balance']
+features = ['Agresividad', 'Resistencia', 'Movilidad', 'Especialista', 'Balanceado']
 X = df[features]
 
 # Escalado
@@ -31,4 +31,5 @@ print(df[features].head())  # o X_scaled para ver los datos listos
 
 print("Datos procesados y escalados correctamente.")
 # Guardar el DataFrame procesado si es necesario
+df.to_csv("Pokemon_processed.csv", index=False)
 #print(X_scaled.head())

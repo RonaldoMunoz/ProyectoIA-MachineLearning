@@ -3,12 +3,12 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 import plotly.express as px
-
+ 
 # Cargar el dataset
-df = pd.read_csv("./Pokemon.csv")
+df = pd.read_csv("./Pokemon_processed.csv")
 
 # Selección de características relevantes
-features = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']
+features = ['Agresividad', 'Resistencia', 'Movilidad', 'Especialista', 'Balanceado']
 X = df[features]
 
 # Escalado de características
@@ -30,10 +30,10 @@ print(mean_stats)
 
 # Nombres temáticos para los clanes (puedes cambiarlos)
 clan_names = {
-    0: "Clan Origen",      # Básicos, comunes, balanceados
-    1: "Clan Relámpago",   # Rápidos y agresivos
-    2: "Clan Celestial",   # Los más poderosos, legendarios
-    3: "Clan Escudo"       # Defensivos, resistentes
+    0: "Sombra",      # Básicos, comunes, balanceados
+    1: "Estratega",   # Rápidos y agresivos
+    2: "Furia",   # Los más poderosos, legendarios
+    3: "Coloso"       # Defensivos, resistentes
 }
 
 # Asignar nombres al DataFrame
