@@ -40,20 +40,54 @@ app = Dash(__name__)
 server = app.server  # Si lo despliegas en la web
 
 # Layout de la app
-app.layout = html.Div([
-    html.H1("Clustering de Pokémon con KMeans y PCA", style={'textAlign': 'center', 'marginBottom': '20px'}),
-    
-    dcc.Dropdown(
-        id='pokemon-dropdown',
-        options=[{'label': name, 'value': name} for name in df['Name'].sort_values()],
-        placeholder="Selecciona un Pokémon",
-        style={'width': '50%'}
-    ),
+app.layout = html.Div(
+    style={
+        'backgroundImage': 'url("/assets/pokemon.jpeg")',
+        'backgroundSize': 'cover',
+        'backgroundRepeat': 'no-repeat',
+        'backgroundPosition': 'center center',
+        'minHeight': '100vh',
+        'padding': '20px',
+        'position': 'relative'
+    },
+    children=[
+        html.Audio(
+            src="/assets/Pokemon.mp3", 
+            controls=False,
+            autoPlay=True,
+            loop=True,
+            style={"display": "none"}  # Oculta el reproductor
+        ),
 
-    html.Div(id='pokemon-info', style={'marginTop': 20, 'fontSize': 16}),
+        html.H1("Clustering de Pokémon con KMeans y PCA", style={'textAlign': 'center', 'marginBottom': '20px'}),
     
-    dcc.Graph(id='scatter-3d', style={'height': '800px'})
-])
+        dcc.Dropdown(
+            id='pokemon-dropdown',
+            options=[{'label': name, 'value': name} for name in df['Name'].sort_values()],
+            placeholder="Selecciona un Pokémon",
+            style={'width': '50%'}
+        ),
+
+        html.Div(id='pokemon-info', style={'marginTop': 20, 'fontSize': 16}),
+    
+        dcc.Graph(
+            id='scatter-3d',
+            style={
+                'height': '600px', 
+                'width': '50%',
+                'float': 'right',
+                'margin': 'auto',
+                'marginRight': '40px',
+                'marginTop':'-85px'},
+                
+            config={
+            'scrollZoom': True,     
+            'displayModeBar': True, 
+            'editable': False,      
+            'staticPlot': False,     
+    })
+    ]
+)
 
 # Callback para actualizar gráfico e info
 @app.callback(
@@ -159,7 +193,7 @@ def actualizar_grafico_y_info(nombre):
             'width': '300px',
             'font-family': 'Arial, sans-serif',
             'box-shadow': '2px 2px 10px rgba(0, 0, 0, 0.1)',
-            'margin-top': '10px'
+            'margin-top': '20px',
         })
 
     else:
@@ -181,13 +215,20 @@ def actualizar_grafico_y_info(nombre):
                         'Cluster': False
             },
             labels={'PCA1': 'Componente principal 1', 'PCA2': 'Componente principal 2', 'PCA3': 'Componente principal 3'},
-            opacity=0.8
+            opacity=1
         )
         info = ""
 
     fig.update_layout(
         margin=dict(l=0, r=0, b=0, t=40),
-        legend=dict(x=0.01, y=0.99)
+        legend=dict(x=0.01, y=0.99, font=dict(size=15, color='white')),
+        scene=dict(
+            xaxis=dict(backgroundcolor='rgba(209,255,255,1)', showbackground=True, color='white', gridcolor='black'),
+            yaxis=dict(backgroundcolor='rgba(209,255,255,1)', showbackground=True, color='white', gridcolor='black'),
+            zaxis=dict(backgroundcolor='rgba(209,255,255,1)', showbackground=True, color='white', gridcolor='black')
+        ),
+        paper_bgcolor='rgba(255,255,255,0)',  # fondo del gráfico
+        plot_bgcolor='rgba(0,0,0,0)'    # fondo del área de trazado
     )
 
     return fig, info
