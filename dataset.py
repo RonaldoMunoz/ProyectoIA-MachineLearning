@@ -16,11 +16,12 @@ for col in required_columns:
 df['Agresividad'] = (df['Attack'] + df['Sp. Atk']) / df['Total']
 df['Resistencia']  = (df['HP'] + df['Defense'] + df['Sp. Def']) / df['Total']
 df['Movilidad']   = df['Speed'] / df['Total']
-df['Especialista'] = abs(df['Attack'] - df['Sp. Atk']) / df['Total']
+df['Especialista ofensivo'] = abs(df['Attack'] - df['Sp. Atk']) / df['Total']
+df['Especialista defensivo'] = abs(df['Defense'] - df['Sp. Def']) / df['Total']
 df['Balanceado']    = df[['HP','Attack','Defense','Sp. Atk','Sp. Def','Speed']].std(axis=1, ddof=0)
 
 # Selección de features
-features = ['Agresividad', 'Resistencia', 'Movilidad', 'Especialista', 'Balanceado']
+features = ['Agresividad', 'Resistencia', 'Movilidad', 'Especialista ofensivo', 'Especialista defensivo', 'Balanceado']
 X = df[features]
 
 # Escalado

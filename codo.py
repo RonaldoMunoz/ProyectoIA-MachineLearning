@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 df = pd.read_csv("./Pokemon_processed.csv")
 
 # Selección de características relevantes
-features = ['Agresividad', 'Resistencia', 'Movilidad', 'Especialista', 'Balanceado']
+features = ['Agresividad', 'Resistencia', 'Movilidad', 'Especialista ofensivo', 'Especialista defensivo', 'Balanceado']
 X = df[features]
 
 # Escalado de características
