@@ -15,7 +15,7 @@ import base64
 df = pd.read_csv("./Pokemon_processed.csv")
 
 # Características seleccionadas
-features = ['Agresividad', 'Resistencia', 'Movilidad', 'Especialista ofensivo', 'Especialista defensivo', 'Balanceado']
+features = ['Agresividad', 'Resistencia', 'Movilidad', 'Especialista ofensivo', 'Especialista defensivo']
 X = df[features]
 
 # Escalado de características
@@ -23,7 +23,7 @@ scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
 # KMeans clustering
-kmeans = KMeans(n_clusters=4, random_state=42)
+kmeans = KMeans(n_clusters=4,random_state=42)
 df['Cluster'] = kmeans.fit_predict(X_scaled)
 
 # Nombres de clanes por cluster
@@ -34,6 +34,9 @@ clan_names = {
     3: "Coloso"
 } 
 df['Clan'] = df['Cluster'].map(clan_names)
+
+# Mostrar estadísticas de cada clan
+print(df.groupby('Cluster')[features].mean())
 
 # Reducción de dimensión para visualización
 pca = PCA(n_components=3)
@@ -53,11 +56,13 @@ variance_explained = pca.explained_variance_ratio_
 total_variance = sum(variance_explained)
 
 # Precalcular datos para visualizaciones
+
 cluster_means = df.groupby('Clan')[features].mean().reset_index()
 global_means = df[features].mean()
 cluster_differences = cluster_means.copy()
 for feature in features:
     cluster_differences[feature] = cluster_differences[feature] - global_means[feature]
+
 
 # Inicializar app Dash
 app = Dash(__name__)

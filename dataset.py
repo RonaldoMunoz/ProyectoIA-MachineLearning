@@ -14,19 +14,23 @@ for col in required_columns:
 
 # Crear rasgos de comportamiento
 df['Agresividad'] = (df['Attack'] + df['Sp. Atk']) / df['Total']
-df['Resistencia']  = (df['HP'] + df['Defense'] + df['Sp. Def']) / df['Total']
-df['Movilidad']   = df['Speed'] / df['Total']
-df['Especialista ofensivo'] = abs(df['Attack'] - df['Sp. Atk']) / df['Total']
-df['Especialista defensivo'] = abs(df['Defense'] - df['Sp. Def']) / df['Total']
-df['Balanceado']    = df[['HP','Attack','Defense','Sp. Atk','Sp. Def','Speed']].std(axis=1, ddof=0)
+
+df['Resistencia'] = (df['HP'] * 0.5 + df['Defense'] + df['Sp. Def']) / (df['Total'] + df['HP'] * 0.5)
+
+df['Movilidad'] = df['Speed'] / df['Total']
+
+df['Especialista ofensivo'] = abs(df['Attack'] - df['Sp. Atk']) / (df['Attack'] + df['Sp. Atk'])
+
+df['Especialista defensivo'] = abs(df['Defense'] - df['Sp. Def']) / (df['Defense'] + df['Sp. Def'])
+
+df['Balanceado'] = df[['HP','Attack','Defense','Sp. Atk','Sp. Def','Speed']].std(axis=1, ddof=0) / \
+                   df[['HP','Attack','Defense','Sp. Atk','Sp. Def','Speed']].mean(axis=1)
+
+
 
 # Selección de features
 features = ['Agresividad', 'Resistencia', 'Movilidad', 'Especialista ofensivo', 'Especialista defensivo', 'Balanceado']
 X = df[features]
-
-# Escalado
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
 
 print(df[features].head())  # o X_scaled para ver los datos listos
 
