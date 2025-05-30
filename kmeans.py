@@ -27,7 +27,7 @@ clan_names = {
     1: "Estratega",
     2: "Furia",
     3: "Coloso"
-}
+} 
 df['Clan'] = df['Cluster'].map(clan_names)
 
 # Reducción de dimensión para visualización
@@ -40,20 +40,64 @@ app = Dash(__name__)
 server = app.server  # Si lo despliegas en la web
 
 # Layout de la app
-app.layout = html.Div([
-    html.H1("Clustering de Pokémon con KMeans y PCA", style={'textAlign': 'center', 'marginBottom': '20px'}),
-    
-    dcc.Dropdown(
-        id='pokemon-dropdown',
-        options=[{'label': name, 'value': name} for name in df['Name'].sort_values()],
-        placeholder="Selecciona un Pokémon",
-        style={'width': '50%'}
-    ),
+app.layout = html.Div(
+    style={
+        'backgroundImage': 'url("/assets/pika.jpg")',
+        'backgroundSize': 'cover',
+        'backgroundRepeat': 'no-repeat',
+        'backgroundPosition': 'center center',
+        'minHeight': '100vh',
+        'padding': '20px',
+        'color': 'black'
+    },
+    children=[
+        html.Audio(
+            src="/assets/Pokemon.mp3", 
+            controls=False,
+            autoPlay=True,
+            loop=True,
+            style={"display": "none"}
+        ),
 
-    html.Div(id='pokemon-info', style={'marginTop': 20, 'fontSize': 16}),
-    
-    dcc.Graph(id='scatter-3d', style={'height': '800px'})
-])
+        html.H1("Clustering de Pokémon con KMeans y PCA", 
+                style={'textAlign': 'center', 'marginBottom': '40px'}),
+
+        html.Div([
+            # Columna izquierda: Dropdown + info
+            html.Div([
+                dcc.Dropdown(
+                    id='pokemon-dropdown',
+                    options=[{'label': name, 'value': name} for name in df['Name'].sort_values()],
+                    placeholder="Selecciona un Pokémon",
+                    style={'width': '100%', 'marginBottom': '20px'}
+                ),
+                html.Div(id='pokemon-info', style={'fontSize': 16})
+            ], style={
+                'width': '35%',
+                'padding': '20px',
+                #'backgroundColor': 'rgba(255, 255, 255, 0.8)',
+                'borderRadius': '10px',
+                'boxShadow': '0px 4px 10px rgba(0, 0, 0, 0.1)',
+                'marginRight': '20px'
+            }),
+
+            # Columna derecha: Gráfico 3D
+            html.Div([
+                dcc.Graph(
+                    id='scatter-3d',
+                    config={
+                        'scrollZoom': True,
+                        'displayModeBar': True,
+                        'editable': False,
+                        'staticPlot': False
+                    },
+                    style={'height': '600px'}
+                )
+            ], style={'width': '65%'})
+        ], style={'display': 'flex', 'justifyContent': 'space-between'})
+    ]
+)
+
 
 # Callback para actualizar gráfico e info
 @app.callback(
@@ -155,13 +199,13 @@ def actualizar_grafico_y_info(nombre):
             'border': '2px solid #ccc',
             'border-radius': '10px',
             'padding': '15px',
-            'background-color': '#f9f9f9',
+            'background-color': "#ffffff",
             'width': '300px',
             'font-family': 'Arial, sans-serif',
             'box-shadow': '2px 2px 10px rgba(0, 0, 0, 0.1)',
-            'margin-top': '10px'
-        })
-
+            'margin-top': '20px',
+}
+)
     else:
         # Si no hay selección, mostrar todos con opacidad normal
         fig = px.scatter_3d(
@@ -181,13 +225,20 @@ def actualizar_grafico_y_info(nombre):
                         'Cluster': False
             },
             labels={'PCA1': 'Componente principal 1', 'PCA2': 'Componente principal 2', 'PCA3': 'Componente principal 3'},
-            opacity=0.8
+            opacity=1
         )
         info = ""
 
     fig.update_layout(
         margin=dict(l=0, r=0, b=0, t=40),
-        legend=dict(x=0.01, y=0.99)
+        legend=dict(x=0.01, y=0.99, font=dict(size=15, color='black')),
+        scene=dict(
+            xaxis=dict(backgroundcolor='rgba(255,255,84,0.8)', showbackground=True, color='black', gridcolor='black'),
+            yaxis=dict(backgroundcolor='rgba(209,255,84,0.8)', showbackground=True, color='black', gridcolor='black'),
+            zaxis=dict(backgroundcolor='rgba(209,255,84,0.8)', showbackground=True, color='black', gridcolor='black')
+        ),
+        paper_bgcolor='rgba(255,255,255,0)',  # fondo del gráfico
+        plot_bgcolor='rgba(0,0,0,0)'    # fondo del área de trazado
     )
 
     return fig, info
