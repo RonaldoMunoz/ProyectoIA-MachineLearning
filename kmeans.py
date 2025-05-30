@@ -4,7 +4,12 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 import plotly.express as px
 import plotly.graph_objects as go
-from dash import Dash, dcc, html, Input, Output
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from dash import Dash, dcc, html, Input, Output, State
+import io
+import base64
 
 # Cargar el dataset
 df = pd.read_csv("./Pokemon_processed.csv")
@@ -35,9 +40,29 @@ pca = PCA(n_components=3)
 X_pca = pca.fit_transform(X_scaled)
 df['PCA1'], df['PCA2'], df['PCA3'] = X_pca[:, 0], X_pca[:, 1], X_pca[:, 2]
 
+# Calcular nombres para los ejes basados en las características
+feature_weights = np.abs(pca.components_)
+axis_names = []
+for i in range(3):
+    # Encontrar la característica con mayor peso en este componente
+    top_feature_idx = np.argmax(feature_weights[i])
+    axis_names.append(features[top_feature_idx])
+
+# Calcular varianza explicada
+variance_explained = pca.explained_variance_ratio_
+total_variance = sum(variance_explained)
+
+# Precalcular datos para visualizaciones
+cluster_means = df.groupby('Clan')[features].mean().reset_index()
+global_means = df[features].mean()
+cluster_differences = cluster_means.copy()
+for feature in features:
+    cluster_differences[feature] = cluster_differences[feature] - global_means[feature]
+
 # Inicializar app Dash
 app = Dash(__name__)
 server = app.server  # Si lo despliegas en la web
+app = Dash(__name__, suppress_callback_exceptions=True)
 
 # Layout de la app
 app.layout = html.Div(
@@ -62,7 +87,136 @@ app.layout = html.Div(
         html.H1("Clustering de Pokémon con KMeans y PCA", 
                 style={'textAlign': 'center', 'marginBottom': '40px'}),
 
-        html.Div([
+        dcc.Tabs(id='tabs', value='tab-3d', style={'backgroundColor': 'rgba(224, 255, 98, 0.8)', 'border': 'none'},  children=[
+            dcc.Tab(label='🏔️ Visualización 3D', value='tab-3d', style={'backgroundColor': 'rgba(247,254,212,0.8)'}),
+            dcc.Tab(label='📊 Matriz de Dispersión', value='tab-pair', style={'backgroundColor': 'rgba(247,254,212,0.8)'}),
+            dcc.Tab(label='📈 Perfiles de Clan', value='tab-radar', style={'backgroundColor': 'rgba(247,254,212,0.8)'}),
+            dcc.Tab(label='🔥 Comparación de Clanes', value='tab-heatmap', style={'backgroundColor': 'rgba(247,254,212,0.8)'}),
+            dcc.Tab(label='🧵 Proyección Paralela', value='tab-parallel', style={'backgroundColor': 'rgba(247,254,212,0.8)'}),
+            dcc.Tab(label='🔍 Explorador de Pokémon', value='tab-explorer', style={'backgroundColor': 'rgba(247,254,212,0.8)'})
+        ]),
+
+        html.Div(id='tabs-content', style={'marginTop': 20}),
+    
+    ])
+# Callback para actualizar contenido de pestañas
+@app.callback(
+    Output('tabs-content', 'children'),
+    Input('tabs', 'value')
+)
+def render_tab(tab):
+    if tab == 'tab-pair':
+        # Crear la figura de matriz de dispersión
+        fig = px.scatter_matrix(
+            df,
+            dimensions=features,
+            color="Clan",
+            hover_name="Name",
+            title="Matriz de Dispersión: Relaciones entre características"
+        )
+        
+        # Ajustes para mejorar la legibilidad
+        fig.update_layout(
+            height=1000,
+            width=1200,
+            font=dict(size=10)
+        )
+        
+        # Rotar las etiquetas de los ejes y ajustar espaciado
+        fig.update_xaxes(tickangle=45, tickfont=dict(size=9))
+        fig.update_yaxes(tickangle=-45, tickfont=dict(size=9))
+        
+        # Ajustar el espaciado entre subplots
+        fig.update_traces(diagonal_visible=False)
+        fig.update_layout(
+            margin=dict(l=50, r=50, b=50, t=80),
+            showlegend=True
+        )
+        
+        return html.Div([
+            dcc.Graph(figure=fig),
+            html.P("🔍 Consejo: Usa el zoom (rueda del mouse) y arrastra para explorar relaciones específicas"),
+            html.P("💡 Las celdas en la diagonal muestran la distribución de cada característica por clan")
+        ], style={'overflowX': 'auto'})
+    
+    elif tab == 'tab-radar':
+        # Crear figura de radar
+        radar_fig = go.Figure()
+        for i, clan in enumerate(cluster_means['Clan']):
+            clan_data = cluster_means[cluster_means['Clan'] == clan]
+            radar_fig.add_trace(go.Scatterpolar(
+                r=clan_data[features].values[0],
+                theta=features,
+                fill='toself',
+                name=clan,
+                line_color=px.colors.qualitative.Plotly[i]
+            ))
+        radar_fig.update_layout(
+            polar=dict(radialaxis=dict(visible=True, range=[0, 0.4])),
+            showlegend=True,
+            title="Perfil promedio de cada Clan",
+            height=500
+        )
+        return html.Div([
+            dcc.Graph(figure=radar_fig),
+            html.P("Interpretación: Este gráfico muestra el perfil promedio de cada clan. Permite identificar fortalezas y debilidades específicas de cada grupo.")
+        ])
+    
+    elif tab == 'tab-heatmap':
+        # Crear mapa de calor
+        plt.figure(figsize=(12, 6))
+        sns.heatmap(
+            cluster_differences.set_index('Clan')[features],
+            annot=True,
+            fmt=".2f",
+            cmap="coolwarm",
+            center=0,
+            linewidths=0.5
+        )
+        plt.title("Desviación de características respecto a la media global por Clan")
+        plt.tight_layout()
+        
+        # Convertir a imagen
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        plt.close()
+        buf.seek(0)
+        heatmap_image = base64.b64encode(buf.read()).decode('utf-8')
+        return html.Div([
+            html.Img(src=f'data:image/png;base64,{heatmap_image}'),
+            html.P("Interpretación: Muestra cómo cada clan se desvía de la media global en cada característica.")
+        ])
+    
+    elif tab == 'tab-parallel':
+        return html.Div([
+            dcc.Graph(
+                figure=px.parallel_coordinates(
+                    df,
+                    color="Cluster",
+                    dimensions=features,
+                    labels={"Cluster": "Clan"},
+                    color_continuous_scale=px.colors.diverging.Tealrose,
+                    title="Proyección Paralela de Características"
+                )
+            ),
+            html.P("Interpretación: Cada línea representa un Pokémon. Permite identificar patrones y valores atípicos.")
+        ])
+    
+    elif tab == 'tab-explorer':
+        return html.Div([
+            html.H3("Explorador de Pokémon por Clan"),
+            dcc.Dropdown(
+                id='clan-dropdown',
+                options=[{'label': clan, 'value': clan} for clan in df['Clan'].unique()],
+                value='Furia',
+                style={'width': '50%', 'marginBottom': '20px'}
+            ),
+            html.Div(id='clan-stats'),
+            dcc.Graph(id='clan-scatter')
+        ])
+    
+    else:  # tab-3d por defecto
+        return html.Div([
             # Columna izquierda: Dropdown + info
             html.Div([
                 dcc.Dropdown(
@@ -95,8 +249,6 @@ app.layout = html.Div(
                 )
             ], style={'width': '65%'})
         ], style={'display': 'flex', 'justifyContent': 'space-between'})
-    ]
-)
 
 
 # Callback para actualizar gráfico e info
@@ -242,6 +394,41 @@ def actualizar_grafico_y_info(nombre):
     )
 
     return fig, info
+
+# Callback para explorador de clanes
+@app.callback(
+    Output('clan-stats', 'children'),
+    Output('clan-scatter', 'figure'),
+    Input('clan-dropdown', 'value')
+)
+def actualizar_clan_info(clan):
+    clan_df = df[df['Clan'] == clan]
+    
+    # Estadísticas principales
+    stats_html = html.Div([
+        html.H4(f"Estadísticas del Clan: {clan}"),
+        html.P(f"Número de Pokémon: {len(clan_df)}"),
+        html.P(f"Agresividad promedio: {clan_df['Agresividad'].mean():.3f}"),
+        html.P(f"Resistencia promedio: {clan_df['Resistencia'].mean():.3f}"),
+        html.P(f"Movilidad promedio: {clan_df['Movilidad'].mean():.3f}"),
+        html.H5("Tipos más comunes:"),
+        html.Ul([html.Li(tipo) for tipo in clan_df['Type 1'].value_counts().head(3).index])
+    ])
+    
+    # Gráfico de dispersión para el clan
+    scatter_fig = px.scatter(
+        clan_df,
+        x='Agresividad',
+        y='Resistencia',
+        color='Type 1',
+        hover_name='Name',
+        size='Total',
+        title=f"Distribución de Pokémon en el Clan {clan}",
+        labels={'Agresividad': 'Agresividad', 'Resistencia': 'Resistencia'}
+    )
+    
+    return stats_html, scatter_fig
+
 
 # Ejecutar la app
 if __name__ == '__main__':
