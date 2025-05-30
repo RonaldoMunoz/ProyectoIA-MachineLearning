@@ -231,11 +231,11 @@ def actualizar_grafico_y_info(nombre):
 
     fig.update_layout(
         margin=dict(l=0, r=0, b=0, t=40),
-        legend=dict(x=0.01, y=0.99, font=dict(size=15, color='white')),
+        legend=dict(x=0.01, y=0.99, font=dict(size=15, color='black')),
         scene=dict(
-            xaxis=dict(backgroundcolor='rgba(209,255,255,1)', showbackground=True, color='white', gridcolor='black'),
-            yaxis=dict(backgroundcolor='rgba(209,255,255,1)', showbackground=True, color='white', gridcolor='black'),
-            zaxis=dict(backgroundcolor='rgba(209,255,255,1)', showbackground=True, color='white', gridcolor='black')
+            xaxis=dict(backgroundcolor='rgba(255,255,84,0.8)', showbackground=True, color='black', gridcolor='black'),
+            yaxis=dict(backgroundcolor='rgba(209,255,84,0.8)', showbackground=True, color='black', gridcolor='black'),
+            zaxis=dict(backgroundcolor='rgba(209,255,84,0.8)', showbackground=True, color='black', gridcolor='black')
         ),
         paper_bgcolor='rgba(255,255,255,0)',  # fondo del gráfico
         plot_bgcolor='rgba(0,0,0,0)'    # fondo del área de trazado
