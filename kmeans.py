@@ -87,7 +87,7 @@ app.layout = html.Div(
         html.H1("Clustering de Pokémon con KMeans y PCA", 
                 style={'textAlign': 'center', 'marginBottom': '40px'}),
 
-        dcc.Tabs(id='tabs', value='tab-3d', style={'backgroundColor': 'rgba(224, 255, 98, 0.8)', 'border': 'none'},  children=[
+        dcc.Tabs(id='tabs', value='tab-3d', style={ 'border': 'none'},  children=[
             dcc.Tab(label='🏔️ Visualización 3D', value='tab-3d', style={'backgroundColor': 'rgba(247,254,212,0.8)'}),
             dcc.Tab(label='📊 Matriz de Dispersión', value='tab-pair', style={'backgroundColor': 'rgba(247,254,212,0.8)'}),
             dcc.Tab(label='📈 Perfiles de Clan', value='tab-radar', style={'backgroundColor': 'rgba(247,254,212,0.8)'}),
@@ -113,13 +113,15 @@ def render_tab(tab):
             color="Clan",
             hover_name="Name",
             title="Matriz de Dispersión: Relaciones entre características"
+            
         )
         
         # Ajustes para mejorar la legibilidad
         fig.update_layout(
             height=1000,
             width=1200,
-            font=dict(size=10)
+            font=dict(size=11)
+            
         )
         
         # Rotar las etiquetas de los ejes y ajustar espaciado
@@ -131,13 +133,16 @@ def render_tab(tab):
         fig.update_layout(
             margin=dict(l=50, r=50, b=50, t=80),
             showlegend=True
+            
         )
         
         return html.Div([
-            dcc.Graph(figure=fig),
+            dcc.Graph(figure=fig, id=''),
             html.P("🔍 Consejo: Usa el zoom (rueda del mouse) y arrastra para explorar relaciones específicas"),
             html.P("💡 Las celdas en la diagonal muestran la distribución de cada característica por clan")
-        ], style={'overflowX': 'auto'})
+        ], style={'overflowX': 'auto', })
+
+        
     
     elif tab == 'tab-radar':
         # Crear figura de radar
