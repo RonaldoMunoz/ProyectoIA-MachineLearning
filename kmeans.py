@@ -28,11 +28,11 @@ df['Cluster'] = kmeans.fit_predict(X_scaled)
 
 # Nombres de clanes por cluster
 clan_names = {
-    0: "Sombra",
-    1: "Estratega",
-    2: "Furia",
-    3: "Coloso"
-} 
+    0: "Belicos",       # Bellicos - Furia: Agresivo y con buena especialidad ofensiva 
+    1: "Titanes",        # Titanes
+    2: "Feroces",    # Feroces: especialistas con buena resistencia
+    3: "Dioses"        # SemiDios, resistentes
+}
 df['Clan'] = df['Cluster'].map(clan_names)
 
 # Mostrar estadísticas de cada clan
@@ -97,7 +97,6 @@ app.layout = html.Div(
             dcc.Tab(label='📊 Matriz de Dispersión', value='tab-pair', style={'backgroundColor': 'rgba(247,254,212,0.8)'}),
             dcc.Tab(label='📈 Perfiles de Clan', value='tab-radar', style={'backgroundColor': 'rgba(247,254,212,0.8)'}),
             dcc.Tab(label='🔥 Comparación de Clanes', value='tab-heatmap', style={'backgroundColor': 'rgba(247,254,212,0.8)'}),
-            dcc.Tab(label='🧵 Proyección Paralela', value='tab-parallel', style={'backgroundColor': 'rgba(247,254,212,0.8)'}),
             dcc.Tab(label='🔍 Explorador de Pokémon', value='tab-explorer', style={'backgroundColor': 'rgba(247,254,212,0.8)'})
         ]),
 
@@ -196,22 +195,6 @@ def render_tab(tab):
             html.Img(src=f'data:image/png;base64,{heatmap_image}'),
             html.P("Interpretación: Muestra cómo cada clan se desvía de la media global en cada característica.")
         ])
-    
-    elif tab == 'tab-parallel':
-        return html.Div([
-            dcc.Graph(
-                figure=px.parallel_coordinates(
-                    df,
-                    color="Cluster",
-                    dimensions=features,
-                    labels={"Cluster": "Clan"},
-                    color_continuous_scale=px.colors.diverging.Tealrose,
-                    title="Proyección Paralela de Características"
-                )
-            ),
-            html.P("Interpretación: Cada línea representa un Pokémon. Permite identificar patrones y valores atípicos.")
-        ])
-    
     elif tab == 'tab-explorer':
         return html.Div([
             html.H3(["Explorador de Pokémon por Clan"], style={'backgroundColor': 'rgba(255, 255, 255, 0.8)', "font-size": "24px", 'padding': '10px', 'borderRadius': '10px', 'boxShadow': '0px 4px 10px rgba(0, 0, 0, 0.1)'}),
