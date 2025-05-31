@@ -235,7 +235,7 @@ def render_tab(tab):
                     placeholder="Selecciona un Pokémon",
                     style={'width': '100%', 'marginBottom': '20px'}
                 ),
-                html.Div(id='pokemon-info', style={'fontSize': 16})
+                html.Div(id='pokemon-info', style={'fontSize': 20})
             ], style={
                 'width': '35%',
                 'padding': '20px',

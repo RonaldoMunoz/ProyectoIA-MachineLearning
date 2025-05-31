@@ -4,7 +4,7 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
 
-# Cargar el dataset (ya lo hiciste en dataset.py, pero lo ponemos aquí completo)
+# Cargar el dataset (ya esta hecho en dataset.py, pero lo ponemos aquí completo)
 df = pd.read_csv("./Pokemon_processed.csv")
 
 # Selección de características relevantes
