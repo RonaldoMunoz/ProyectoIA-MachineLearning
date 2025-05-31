@@ -214,7 +214,7 @@ def render_tab(tab):
     
     elif tab == 'tab-explorer':
         return html.Div([
-            html.H3("Explorador de Pokémon por Clan"),
+            html.H3(["Explorador de Pokémon por Clan"], style={'backgroundColor': 'rgba(255, 255, 255, 0.8)', "font-size": "24px", 'padding': '10px', 'borderRadius': '10px', 'boxShadow': '0px 4px 10px rgba(0, 0, 0, 0.1)'}),
             dcc.Dropdown(
                 id='clan-dropdown',
                 options=[{'label': clan, 'value': clan} for clan in df['Clan'].unique()],
@@ -415,7 +415,7 @@ def actualizar_clan_info(clan):
     clan_df = df[df['Clan'] == clan]
     
     # Estadísticas principales
-    stats_html = html.Div([
+    stats_html = html.Div( [
         html.H4(f"Estadísticas del Clan: {clan}"),
         html.P(f"Número de Pokémon: {len(clan_df)}"),
         html.P(f"Agresividad promedio: {clan_df['Agresividad'].mean():.3f}"),
@@ -423,7 +423,17 @@ def actualizar_clan_info(clan):
         html.P(f"Movilidad promedio: {clan_df['Movilidad'].mean():.3f}"),
         html.H5("Tipos más comunes:"),
         html.Ul([html.Li(tipo) for tipo in clan_df['Type 1'].value_counts().head(3).index])
-    ])
+    ], 
+    
+    style={'backgroundColor': 'rgba(255, 255, 255, 0.9)',
+              'border': '2px solid #ccc',
+                'border-radius': '10px',
+                'padding': '15px', 
+                'width': '300px',
+            'font-family': 'Arial, sans-serif',
+            'box-shadow': '2px 2px 10px rgba(0, 0, 0, 0.1)',
+            'margin-top': '20px',
+            "font-size": "18px",})
     
     # Gráfico de dispersión para el clan
     scatter_fig = px.scatter(
